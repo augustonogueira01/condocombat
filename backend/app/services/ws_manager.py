@@ -6,6 +6,7 @@ import time
 from dataclasses import dataclass, field
 
 from fastapi import WebSocket
+from starlette.websockets import WebSocketDisconnect
 
 from app.schemas.ws_message import EventType, WSMessage
 
@@ -13,6 +14,17 @@ logger = logging.getLogger(__name__)
 
 HEARTBEAT_INTERVAL = 30  # seconds between PINGs
 PONG_TIMEOUT = 10  # seconds to wait for PONG before disconnecting
+
+
+# Exceptions raised on send failures we want to handle explicitly.
+# Keep this list narrow to avoid catching unrelated errors.
+WS_SEND_EXCEPTIONS = (
+    WebSocketDisconnect,  # normal client disconnect via starlette/fastapi
+    RuntimeError,         # sometimes raised on closed transports
+    ConnectionResetError, # connection reset
+    BrokenPipeError,      # broken pipe on send
+    OSError,              # lower-level socket errors
+)
 
 
 @dataclass
@@ -73,10 +85,12 @@ class WSConnectionManager:
         """Envia mensagem para todas as conexões ativas."""
         payload = message.model_dump(mode="json")
         disconnected: list[WebSocket] = []
-        for ws in self._connections:
+        # iterate over a snapshot of the keys to avoid runtime changes
+        for ws in list(self._connections.keys()):
             try:
                 await ws.send_json(payload)
-            except Exception:
+            except WS_SEND_EXCEPTIONS as exc:
+                logger.debug("WS broadcast send failed, scheduling disconnect: %s", exc)
                 disconnected.append(ws)
         for ws in disconnected:
             self.disconnect(ws)
@@ -88,7 +102,8 @@ class WSConnectionManager:
         payload = message.model_dump(mode="json")
         try:
             await websocket.send_json(payload)
-        except Exception:
+        except WS_SEND_EXCEPTIONS as exc:
+            logger.debug("WS send_personal failed for %s: %s", getattr(websocket, "client", None), exc)
             self.disconnect(websocket)
 
     async def _heartbeat_loop(self, websocket: WebSocket) -> None:
@@ -106,7 +121,8 @@ class WSConnectionManager:
                 ping = WSMessage(type=EventType.PING)
                 try:
                     await websocket.send_json(ping.model_dump(mode="json"))
-                except Exception:
+                except WS_SEND_EXCEPTIONS as exc:
+                    logger.debug("WS heartbeat ping failed, disconnecting: %s", exc)
                     self.disconnect(websocket)
                     break
 
@@ -124,6 +140,7 @@ class WSConnectionManager:
                     self.disconnect(websocket)
                     break
         except asyncio.CancelledError:
+            # Let cancellation propagate silently
             pass
 
     async def shutdown(self) -> None:
