@@ -1,7 +1,6 @@
 # =============================================================================
 # CondoCombat — Docker Compose (Backend + Frontend + Database)
 # =============================================================================
-version: '3.8'
 
 services:
   # PostgreSQL Database
