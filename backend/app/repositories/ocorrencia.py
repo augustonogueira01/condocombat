@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,10 +29,7 @@ class OcorrenciaRepository:
         gravidade: str | None = None,
         apartamento_id: int | None = None,
     ) -> list[Ocorrencia]:
-        stmt = (
-            select(Ocorrencia)
-            .order_by(Ocorrencia.created_at.desc())
-        )
+        stmt = select(Ocorrencia).order_by(Ocorrencia.created_at.desc())
         if categoria is not None:
             stmt = stmt.where(Ocorrencia.categoria == categoria)
         if status is not None:
@@ -45,7 +42,7 @@ class OcorrenciaRepository:
         return list(result.scalars().all())
 
     async def list_recentes(self) -> list[Ocorrencia]:
-        limite = datetime.now(timezone.utc) - timedelta(hours=24)
+        limite = datetime.now(UTC) - timedelta(hours=24)
         result = await self.session.execute(
             select(Ocorrencia)
             .where(Ocorrencia.created_at >= limite)

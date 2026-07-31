@@ -1,7 +1,7 @@
 """Integration tests for Rivalidade REST endpoints."""
 
 from collections.abc import AsyncGenerator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -56,8 +56,8 @@ def _make(**kw: dict) -> MagicMock:
         "motivo": "Barulho",
         "nivel": "moderado",
         "status": "ativa",
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
+        "updated_at": datetime.now(UTC),
     }
     vals.update(kw)
     return MagicMock(**vals)
@@ -67,7 +67,9 @@ def _make(**kw: dict) -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_retorna_lista(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     a, b = _make(id=1), _make(id=2, apartamento_a_id=201)
     mock_service.listar.return_value = [a, b]
 
@@ -78,7 +80,9 @@ async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: No
 
 
 @pytest.mark.asyncio
-async def test_listar_retorna_vazia(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_retorna_vazia(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.listar.return_value = []
 
     response = await client.get("/rivalidades/")
@@ -91,7 +95,9 @@ async def test_listar_retorna_vazia(client: httpx.AsyncClient, override_deps: No
 
 
 @pytest.mark.asyncio
-async def test_por_apartamento_retorna_lista(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_por_apartamento_retorna_lista(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.listar_por_apartamento.return_value = [_make(), _make(id=2)]
 
     response = await client.get("/rivalidades/por-apartamento/101")
@@ -101,7 +107,9 @@ async def test_por_apartamento_retorna_lista(client: httpx.AsyncClient, override
 
 
 @pytest.mark.asyncio
-async def test_por_apartamento_retorna_vazia(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_por_apartamento_retorna_vazia(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.listar_por_apartamento.return_value = []
 
     response = await client.get("/rivalidades/por-apartamento/999")
@@ -114,7 +122,9 @@ async def test_por_apartamento_retorna_vazia(client: httpx.AsyncClient, override
 
 
 @pytest.mark.asyncio
-async def test_top_retorna_lista(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_top_retorna_lista(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.top_rivalidades.return_value = [_make(), _make(id=2, nivel="belico")]
 
     response = await client.get("/rivalidades/top")
@@ -124,7 +134,9 @@ async def test_top_retorna_lista(client: httpx.AsyncClient, override_deps: None,
 
 
 @pytest.mark.asyncio
-async def test_top_com_limite(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_top_com_limite(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.top_rivalidades.return_value = [_make(), _make(id=2)]
 
     response = await client.get("/rivalidades/top?limite=5")
@@ -136,7 +148,9 @@ async def test_top_com_limite(client: httpx.AsyncClient, override_deps: None, mo
 
 
 @pytest.mark.asyncio
-async def test_obter_retorna_rivalidade(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_retorna_rivalidade(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.buscar.return_value = _make()
 
     response = await client.get("/rivalidades/1")
@@ -146,7 +160,9 @@ async def test_obter_retorna_rivalidade(client: httpx.AsyncClient, override_deps
 
 
 @pytest.mark.asyncio
-async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.buscar.side_effect = RivalidadeNaoEncontrada("não encontrada")
 
     response = await client.get("/rivalidades/999")
@@ -158,7 +174,9 @@ async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, overri
 
 
 @pytest.mark.asyncio
-async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_retorna_201(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.return_value = _make()
 
     response = await client.post(
@@ -176,14 +194,18 @@ async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None,
 
 
 @pytest.mark.asyncio
-async def test_criar_422_quando_dados_invalidos(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_422_quando_dados_invalidos(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.post("/rivalidades/", json={})
 
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_criar_409_quando_rivalidade_ja_existe(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_409_quando_rivalidade_ja_existe(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.side_effect = RivalidadeJaExiste("já existe")
 
     response = await client.post(
@@ -199,7 +221,9 @@ async def test_criar_409_quando_rivalidade_ja_existe(client: httpx.AsyncClient, 
 
 
 @pytest.mark.asyncio
-async def test_criar_409_quando_nivel_invalido(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_409_quando_nivel_invalido(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.side_effect = NivelInvalido("nivel inválido")
 
     response = await client.post(
@@ -218,7 +242,9 @@ async def test_criar_409_quando_nivel_invalido(client: httpx.AsyncClient, overri
 
 
 @pytest.mark.asyncio
-async def test_escalar_retorna_200(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_escalar_retorna_200(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.escalar.return_value = _make(nivel="intenso")
 
     response = await client.post("/rivalidades/1/escalar")
@@ -228,7 +254,9 @@ async def test_escalar_retorna_200(client: httpx.AsyncClient, override_deps: Non
 
 
 @pytest.mark.asyncio
-async def test_escalar_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_escalar_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.escalar.side_effect = RivalidadeNaoEncontrada("não encontrada")
 
     response = await client.post("/rivalidades/999/escalar")
@@ -240,7 +268,9 @@ async def test_escalar_404_quando_nao_encontrado(client: httpx.AsyncClient, over
 
 
 @pytest.mark.asyncio
-async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_retorna_200(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.return_value = _make(motivo="Novo motivo")
 
     response = await client.put("/rivalidades/1", json={"motivo": "Novo motivo"})
@@ -250,7 +280,9 @@ async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: N
 
 
 @pytest.mark.asyncio
-async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.side_effect = RivalidadeNaoEncontrada("não encontrada")
 
     response = await client.put("/rivalidades/999", json={"motivo": "X"})
@@ -259,7 +291,9 @@ async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, ov
 
 
 @pytest.mark.asyncio
-async def test_atualizar_422_quando_nivel_invalido(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_422_quando_nivel_invalido(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     # schema validation catches invalid nivel before service
     response = await client.put("/rivalidades/1", json={"nivel": "invalido"})
 
@@ -267,7 +301,9 @@ async def test_atualizar_422_quando_nivel_invalido(client: httpx.AsyncClient, ov
 
 
 @pytest.mark.asyncio
-async def test_atualizar_400_sem_campos(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_400_sem_campos(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.put("/rivalidades/1", json={})
 
     assert response.status_code == 400
@@ -277,14 +313,18 @@ async def test_atualizar_400_sem_campos(client: httpx.AsyncClient, override_deps
 
 
 @pytest.mark.asyncio
-async def test_remover_retorna_204(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_retorna_204(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.delete("/rivalidades/1")
 
     assert response.status_code == 204
 
 
 @pytest.mark.asyncio
-async def test_remover_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.remover.side_effect = RivalidadeNaoEncontrada("não encontrada")
 
     response = await client.delete("/rivalidades/999")

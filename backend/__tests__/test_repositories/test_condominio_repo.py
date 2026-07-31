@@ -61,9 +61,7 @@ class TestGetAll:
             Condominio(id=1, nome="A", endereco="Rua A"),
             Condominio(id=2, nome="B", endereco="Rua B"),
         ]
-        mock_session.execute.return_value.scalars.return_value.all.return_value = (
-            conds
-        )
+        mock_session.execute.return_value.scalars.return_value.all.return_value = conds
         result = await repo.get_all()
         assert len(result) == 2
         mock_session.execute.assert_awaited_once()

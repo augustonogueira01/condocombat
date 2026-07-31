@@ -5,16 +5,16 @@ Revises:
 Create Date: 2026-05-31 12:00:00.000000
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 revision: str = "001"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -65,9 +65,7 @@ def upgrade() -> None:
             name="uq_apartamento_identificacao",
         ),
     )
-    op.create_index(
-        "ix_apartamento_condominio", "apartamentos", ["condominio_id"]
-    )
+    op.create_index("ix_apartamento_condominio", "apartamentos", ["condominio_id"])
 
     # --- moradores ---
     op.create_table(
@@ -77,9 +75,7 @@ def upgrade() -> None:
         sa.Column("cpf", sa.String(14), nullable=False, unique=True),
         sa.Column("email", sa.String(200), nullable=False, unique=True),
         sa.Column("telefone", sa.String(20), nullable=True),
-        sa.Column(
-            "tipo", sa.String(20), nullable=False, server_default="proprietario"
-        ),
+        sa.Column("tipo", sa.String(20), nullable=False, server_default="proprietario"),
         sa.Column("apartamento_id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
@@ -94,9 +90,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "ix_morador_apartamento", "moradores", ["apartamento_id"]
-    )
+    op.create_index("ix_morador_apartamento", "moradores", ["apartamento_id"])
 
     # --- ocorrencias ---
     op.create_table(
@@ -105,12 +99,8 @@ def upgrade() -> None:
         sa.Column("titulo", sa.String(200), nullable=False),
         sa.Column("descricao", sa.Text(), nullable=False),
         sa.Column("categoria", sa.String(50), nullable=False),
-        sa.Column(
-            "gravidade", sa.String(20), nullable=False, server_default="media"
-        ),
-        sa.Column(
-            "status", sa.String(20), nullable=False, server_default="aberta"
-        ),
+        sa.Column("gravidade", sa.String(20), nullable=False, server_default="media"),
+        sa.Column("status", sa.String(20), nullable=False, server_default="aberta"),
         sa.Column("apartamento_id", sa.Integer(), nullable=False),
         sa.Column(
             "created_at",
@@ -131,18 +121,10 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "ix_ocorrencia_categoria", "ocorrencias", ["categoria"]
-    )
-    op.create_index(
-        "ix_ocorrencia_status", "ocorrencias", ["status"]
-    )
-    op.create_index(
-        "ix_ocorrencia_apartamento", "ocorrencias", ["apartamento_id"]
-    )
-    op.create_index(
-        "ix_ocorrencia_created_at", "ocorrencias", ["created_at"]
-    )
+    op.create_index("ix_ocorrencia_categoria", "ocorrencias", ["categoria"])
+    op.create_index("ix_ocorrencia_status", "ocorrencias", ["status"])
+    op.create_index("ix_ocorrencia_apartamento", "ocorrencias", ["apartamento_id"])
+    op.create_index("ix_ocorrencia_created_at", "ocorrencias", ["created_at"])
 
     # --- rivalidades ---
     op.create_table(
@@ -151,12 +133,8 @@ def upgrade() -> None:
         sa.Column("apartamento_a_id", sa.Integer(), nullable=False),
         sa.Column("apartamento_b_id", sa.Integer(), nullable=False),
         sa.Column("motivo", sa.String(200), nullable=True),
-        sa.Column(
-            "nivel", sa.String(20), nullable=False, server_default="moderado"
-        ),
-        sa.Column(
-            "status", sa.String(20), nullable=False, server_default="ativa"
-        ),
+        sa.Column("nivel", sa.String(20), nullable=False, server_default="moderado"),
+        sa.Column("status", sa.String(20), nullable=False, server_default="ativa"),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),

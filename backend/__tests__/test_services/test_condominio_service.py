@@ -26,9 +26,7 @@ def service(repo_mock):
 
 class TestCriar:
     async def test_cria_condominio_sem_cnpj(self, service, repo_mock):
-        data = CondominioCreate(
-            nome="Condomínio Teste", endereco="Rua Teste, 100"
-        )
+        data = CondominioCreate(nome="Condomínio Teste", endereco="Rua Teste, 100")
         repo_mock.create.return_value = Condominio(
             id=1, nome="Condomínio Teste", endereco="Rua Teste, 100"
         )
@@ -102,9 +100,7 @@ class TestBuscar:
 
 class TestAtualizar:
     async def test_atualiza_sem_cnpj(self, service, repo_mock):
-        repo_mock.update.return_value = Condominio(
-            id=1, nome="Novo", endereco="Rua X"
-        )
+        repo_mock.update.return_value = Condominio(id=1, nome="Novo", endereco="Rua X")
         data = CondominioUpdate(nome="Novo")
         result = await service.atualizar(1, data)
         assert result.nome == "Novo"

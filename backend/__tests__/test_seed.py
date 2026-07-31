@@ -27,9 +27,7 @@ def test_condominios_cnpj_formato():
     """CNPJ deve seguir formato 99.999.999/0001-99."""
     padrao = re.compile(r"^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$")
     for c in CONDOMINIOS:
-        assert padrao.match(c["cnpj"]), (
-            f"CNPJ inválido: {c['cnpj']}"
-        )
+        assert padrao.match(c["cnpj"]), f"CNPJ inválido: {c['cnpj']}"
 
 
 def test_condominios_cnpj_unicos():
@@ -52,9 +50,7 @@ def test_moradores_cpf_formato():
     """CPF deve seguir formato 999.999.999-99."""
     padrao = re.compile(r"^\d{3}\.\d{3}\.\d{3}-\d{2}$")
     for m in MORADORES:
-        assert padrao.match(m["cpf"]), (
-            f"CPF inválido: {m['cpf']} para {m['nome']}"
-        )
+        assert padrao.match(m["cpf"]), f"CPF inválido: {m['cpf']} para {m['nome']}"
 
 
 def test_moradores_cpf_unicos():
@@ -75,9 +71,7 @@ def test_moradores_tipos_validos():
     """tipo do morador deve ser um dos valores aceitos."""
     tipos_validos = {"proprietario", "inquilino", "sindico"}
     for m in MORADORES:
-        assert m["tipo"] in tipos_validos, (
-            f"Tipo inválido {m['tipo']} para {m['nome']}"
-        )
+        assert m["tipo"] in tipos_validos, f"Tipo inválido {m['tipo']} para {m['nome']}"
 
 
 def test_ocorrencias_campos_obrigatorios():
@@ -130,9 +124,7 @@ def test_rivalidades_sem_duplicatas():
     for r in RIVALIDADES:
         par = (r["apartamento_a_idx"], r["apartamento_b_idx"])
         par_inv = (r["apartamento_b_idx"], r["apartamento_a_idx"])
-        assert par not in pares and par_inv not in pares, (
-            f"Rivalidade duplicada: {par}"
-        )
+        assert par not in pares and par_inv not in pares, f"Rivalidade duplicada: {par}"
         pares.add(par)
 
 

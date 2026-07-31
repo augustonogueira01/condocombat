@@ -1,6 +1,7 @@
 """Integration tests for Condominio REST endpoints."""
 
 from collections.abc import AsyncGenerator
+from datetime import UTC
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -51,7 +52,7 @@ def _make_condominio(
     cnpj: str = "11.222.333/0001-44",
 ) -> Condominio:
     """Cria um objeto Condominio simulado."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     obj = MagicMock(spec=Condominio)
     obj.id = condominio_id
@@ -60,8 +61,8 @@ def _make_condominio(
     obj.cnpj = cnpj
     obj.telefone = "(11) 99999-0000"
     obj.email = "teste@condominio.com"
-    obj.created_at = datetime.now(timezone.utc)
-    obj.updated_at = datetime.now(timezone.utc)
+    obj.created_at = datetime.now(UTC)
+    obj.updated_at = datetime.now(UTC)
     return obj
 
 
@@ -69,7 +70,9 @@ def _make_condominio(
 
 
 @pytest.mark.asyncio
-async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_retorna_lista(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     cond_a = _make_condominio(1, "Cond A")
     cond_b = _make_condominio(2, "Cond B")
     mock_service.listar.return_value = [cond_a, cond_b]
@@ -84,7 +87,9 @@ async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: No
 
 
 @pytest.mark.asyncio
-async def test_listar_retorna_vazia(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_retorna_vazia(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.listar.return_value = []
 
     response = await client.get("/condominios/")
@@ -97,7 +102,9 @@ async def test_listar_retorna_vazia(client: httpx.AsyncClient, override_deps: No
 
 
 @pytest.mark.asyncio
-async def test_obter_retorna_condominio(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_retorna_condominio(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     cond = _make_condominio(1)
     mock_service.buscar.return_value = cond
 
@@ -108,7 +115,9 @@ async def test_obter_retorna_condominio(client: httpx.AsyncClient, override_deps
 
 
 @pytest.mark.asyncio
-async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.buscar.side_effect = CondominioNaoEncontrado("não encontrado")
 
     response = await client.get("/condominios/999")
@@ -121,7 +130,9 @@ async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, overri
 
 
 @pytest.mark.asyncio
-async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_retorna_201(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     cond = _make_condominio(1)
     mock_service.criar.return_value = cond
 
@@ -135,14 +146,18 @@ async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None,
 
 
 @pytest.mark.asyncio
-async def test_criar_422_quando_dados_invalidos(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_422_quando_dados_invalidos(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.post("/condominios/", json={})
 
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_criar_409_quando_cnpj_duplicado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_409_quando_cnpj_duplicado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.side_effect = CondominioJaExiste("CNPJ já cadastrado")
 
     response = await client.post(
@@ -162,7 +177,9 @@ async def test_criar_409_quando_cnpj_duplicado(client: httpx.AsyncClient, overri
 
 
 @pytest.mark.asyncio
-async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_retorna_200(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     cond = _make_condominio(1, nome="Nome Atualizado")
     mock_service.atualizar.return_value = cond
 
@@ -176,7 +193,9 @@ async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: N
 
 
 @pytest.mark.asyncio
-async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.side_effect = CondominioNaoEncontrado("não encontrado")
 
     response = await client.put(
@@ -188,8 +207,12 @@ async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, ov
 
 
 @pytest.mark.asyncio
-async def test_atualizar_409_quando_cnpj_duplicado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
-    mock_service.atualizar.side_effect = CondominioJaExiste("CNPJ já pertence a outro condomínio")
+async def test_atualizar_409_quando_cnpj_duplicado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
+    mock_service.atualizar.side_effect = CondominioJaExiste(
+        "CNPJ já pertence a outro condomínio"
+    )
 
     response = await client.put(
         "/condominios/1",
@@ -200,7 +223,9 @@ async def test_atualizar_409_quando_cnpj_duplicado(client: httpx.AsyncClient, ov
 
 
 @pytest.mark.asyncio
-async def test_atualizar_422_quando_cnpj_invalido(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_422_quando_cnpj_invalido(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.put(
         "/condominios/1",
         json={"cnpj": "123"},
@@ -213,7 +238,9 @@ async def test_atualizar_422_quando_cnpj_invalido(client: httpx.AsyncClient, ove
 
 
 @pytest.mark.asyncio
-async def test_remover_retorna_204(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_retorna_204(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.remover = AsyncMock()
 
     response = await client.delete("/condominios/1")
@@ -222,7 +249,9 @@ async def test_remover_retorna_204(client: httpx.AsyncClient, override_deps: Non
 
 
 @pytest.mark.asyncio
-async def test_remover_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.remover.side_effect = CondominioNaoEncontrado("não encontrado")
 
     response = await client.delete("/condominios/999")

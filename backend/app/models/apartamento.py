@@ -11,7 +11,10 @@ class Apartamento(Base):
 
     __table_args__ = (
         UniqueConstraint(
-            "numero", "bloco", "torre", "condominio_id",
+            "numero",
+            "bloco",
+            "torre",
+            "condominio_id",
             name="uq_apartamento_identificacao",
         ),
     )
@@ -25,9 +28,9 @@ class Apartamento(Base):
         ForeignKey("condominios.id"), nullable=False, index=True
     )
 
-    condominio: Mapped["Condominio"] = relationship(  # noqa: F821
+    condominio: Mapped[Condominio] = relationship(  # noqa: F821
         "Condominio", back_populates="apartamentos"
     )
-    moradores: Mapped[list["Morador"]] = relationship(  # noqa: F821
+    moradores: Mapped[list[Morador]] = relationship(  # noqa: F821
         "Morador", back_populates="apartamento"
     )

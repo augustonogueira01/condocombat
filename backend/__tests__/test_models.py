@@ -141,7 +141,9 @@ async def test_condominio_apartamentos_relationship(async_session):
     await async_session.commit()
 
     result = await async_session.execute(
-        select(Condominio).where(Condominio.id == cond.id).options(selectinload(Condominio.apartamentos))
+        select(Condominio)
+        .where(Condominio.id == cond.id)
+        .options(selectinload(Condominio.apartamentos))
     )
     cond_db = result.scalar_one()
     assert len(cond_db.apartamentos) == 2
@@ -159,13 +161,19 @@ async def test_apartamento_moradores_relationship(async_session):
     async_session.add(apt)
     await async_session.flush()
 
-    m1 = Morador(nome="Ana", cpf="111.222.333-44", email="ana@email.com", apartamento_id=apt.id)
-    m2 = Morador(nome="Beto", cpf="555.666.777-88", email="beto@email.com", apartamento_id=apt.id)
+    m1 = Morador(
+        nome="Ana", cpf="111.222.333-44", email="ana@email.com", apartamento_id=apt.id
+    )
+    m2 = Morador(
+        nome="Beto", cpf="555.666.777-88", email="beto@email.com", apartamento_id=apt.id
+    )
     async_session.add_all([m1, m2])
     await async_session.commit()
 
     result = await async_session.execute(
-        select(Apartamento).where(Apartamento.id == apt.id).options(selectinload(Apartamento.moradores))
+        select(Apartamento)
+        .where(Apartamento.id == apt.id)
+        .options(selectinload(Apartamento.moradores))
     )
     apt_db = result.scalar_one()
     assert len(apt_db.moradores) == 2
@@ -175,9 +183,15 @@ async def test_apartamento_moradores_relationship(async_session):
 def test_unique_constraint_apartamento():
     """Verifica que existe constraint única para numero+bloco+torre+condominio_id no modelo."""
     from sqlalchemy import inspect
+
     from app.models import Apartamento
+
     insp = inspect(Apartamento.__table__)
-    unique_constraints = [c for c in insp.constraints if hasattr(c, 'columns') and c.__class__.__name__ == 'UniqueConstraint']
+    unique_constraints = [
+        c
+        for c in insp.constraints
+        if hasattr(c, "columns") and c.__class__.__name__ == "UniqueConstraint"
+    ]
     assert any(
         set(c.columns.keys()) == {"numero", "bloco", "torre", "condominio_id"}
         for c in unique_constraints
@@ -187,9 +201,15 @@ def test_unique_constraint_apartamento():
 def test_unique_constraint_rivalidade():
     """Verifica que existe constraint única para par (apartamento_a, apartamento_b) no modelo."""
     from sqlalchemy import inspect
+
     from app.models import Rivalidade
+
     insp = inspect(Rivalidade.__table__)
-    unique_constraints = [c for c in insp.constraints if hasattr(c, 'columns') and c.__class__.__name__ == 'UniqueConstraint']
+    unique_constraints = [
+        c
+        for c in insp.constraints
+        if hasattr(c, "columns") and c.__class__.__name__ == "UniqueConstraint"
+    ]
     assert any(
         set(c.columns.keys()) == {"apartamento_a_id", "apartamento_b_id"}
         for c in unique_constraints

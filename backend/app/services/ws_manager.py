@@ -20,10 +20,10 @@ PONG_TIMEOUT = 10  # seconds to wait for PONG before disconnecting
 # Keep this list narrow to avoid catching unrelated errors.
 WS_SEND_EXCEPTIONS = (
     WebSocketDisconnect,  # normal client disconnect via starlette/fastapi
-    RuntimeError,         # sometimes raised on closed transports
-    ConnectionResetError, # connection reset
-    BrokenPipeError,      # broken pipe on send
-    OSError,              # lower-level socket errors
+    RuntimeError,  # sometimes raised on closed transports
+    ConnectionResetError,  # connection reset
+    BrokenPipeError,  # broken pipe on send
+    OSError,  # lower-level socket errors
 )
 
 
@@ -38,7 +38,11 @@ class ConnectionInfo:
 class WSConnectionManager:
     """Gerencia conexões WebSocket com broadcast e heartbeat."""
 
-    def __init__(self, heartbeat_interval: int = HEARTBEAT_INTERVAL, pong_timeout: int = PONG_TIMEOUT) -> None:
+    def __init__(
+        self,
+        heartbeat_interval: int = HEARTBEAT_INTERVAL,
+        pong_timeout: int = PONG_TIMEOUT,
+    ) -> None:
         self._connections: dict[WebSocket, ConnectionInfo] = {}
         self._heartbeat_tasks: dict[WebSocket, asyncio.Task] = {}
         self._heartbeat_interval = heartbeat_interval
@@ -95,15 +99,17 @@ class WSConnectionManager:
         for ws in disconnected:
             self.disconnect(ws)
 
-    async def send_personal(
-        self, message: WSMessage, websocket: WebSocket
-    ) -> None:
+    async def send_personal(self, message: WSMessage, websocket: WebSocket) -> None:
         """Envia mensagem para uma conexão específica."""
         payload = message.model_dump(mode="json")
         try:
             await websocket.send_json(payload)
         except WS_SEND_EXCEPTIONS as exc:
-            logger.debug("WS send_personal failed for %s: %s", getattr(websocket, "client", None), exc)
+            logger.debug(
+                "WS send_personal failed for %s: %s",
+                getattr(websocket, "client", None),
+                exc,
+            )
             self.disconnect(websocket)
 
     async def _heartbeat_loop(self, websocket: WebSocket) -> None:
@@ -134,9 +140,7 @@ class WSConnectionManager:
                     break
 
                 if info.last_pong == before:
-                    logger.warning(
-                        "WS heartbeat timeout — no PONG, disconnecting"
-                    )
+                    logger.warning("WS heartbeat timeout — no PONG, disconnecting")
                     self.disconnect(websocket)
                     break
         except asyncio.CancelledError:

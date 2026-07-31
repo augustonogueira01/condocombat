@@ -21,7 +21,7 @@ def engine():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    
+
     # Enable foreign key constraints for SQLite
     @event.listens_for(engine.sync_engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -29,7 +29,7 @@ def engine():
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.execute("PRAGMA unique_check=ON")
         cursor.close()
-    
+
     yield engine
 
 
@@ -46,7 +46,9 @@ async def create_tables(engine):
 @pytest.fixture
 async def async_session(engine, create_tables):
     """Create async session for integration tests."""
-    async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async_session_maker = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
     async with async_session_maker() as session:
         yield session
 
@@ -60,6 +62,7 @@ def mock_session():
     sync como scalar_one_or_none() e scalars().all() funcionem.
     """
     from unittest.mock import AsyncMock, MagicMock
+
     from sqlalchemy.ext.asyncio import AsyncSession
 
     session = AsyncMock(spec=AsyncSession)

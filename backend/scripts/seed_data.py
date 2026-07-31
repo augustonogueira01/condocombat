@@ -59,8 +59,18 @@ APARTAMENTOS: list[dict[str, Any]] = [
     {"numero": "05", "bloco": "Leste", "torre": "Torre do Fundão", "condominio_idx": 1},
     {"numero": "06", "bloco": "Leste", "torre": "Torre do Fundão", "condominio_idx": 1},
     # Edifício Disputa&Guerra (cond_id=3)
-    {"numero": "1A", "bloco": "Bloco dos Apontamentos", "torre": None, "condominio_idx": 2},
-    {"numero": "1B", "bloco": "Bloco dos Apontamentos", "torre": None, "condominio_idx": 2},
+    {
+        "numero": "1A",
+        "bloco": "Bloco dos Apontamentos",
+        "torre": None,
+        "condominio_idx": 2,
+    },
+    {
+        "numero": "1B",
+        "bloco": "Bloco dos Apontamentos",
+        "torre": None,
+        "condominio_idx": 2,
+    },
     {"numero": "2A", "bloco": "Bloco das Disputas", "torre": None, "condominio_idx": 2},
     {"numero": "2B", "bloco": "Bloco das Disputas", "torre": None, "condominio_idx": 2},
     {"numero": "3A", "bloco": "Bloco da Trégua", "torre": None, "condominio_idx": 2},
@@ -69,9 +79,24 @@ APARTAMENTOS: list[dict[str, Any]] = [
     {"numero": "1201", "bloco": "A", "torre": "Torre dos Atritos", "condominio_idx": 3},
     {"numero": "1202", "bloco": "A", "torre": "Torre dos Atritos", "condominio_idx": 3},
     {"numero": "1301", "bloco": "A", "torre": "Torre dos Atritos", "condominio_idx": 3},
-    {"numero": "1401", "bloco": "B", "torre": "Torre das Desavenças", "condominio_idx": 3},
-    {"numero": "1402", "bloco": "B", "torre": "Torre das Desavenças", "condominio_idx": 3},
-    {"numero": "1501", "bloco": "B", "torre": "Torre das Desavenças", "condominio_idx": 3},
+    {
+        "numero": "1401",
+        "bloco": "B",
+        "torre": "Torre das Desavenças",
+        "condominio_idx": 3,
+    },
+    {
+        "numero": "1402",
+        "bloco": "B",
+        "torre": "Torre das Desavenças",
+        "condominio_idx": 3,
+    },
+    {
+        "numero": "1501",
+        "bloco": "B",
+        "torre": "Torre das Desavenças",
+        "condominio_idx": 3,
+    },
     # Conjunto Residencial Quem Cala (cond_id=5)
     {"numero": "A1", "bloco": "Silêncio", "torre": None, "condominio_idx": 4},
     {"numero": "A2", "bloco": "Silêncio", "torre": None, "condominio_idx": 4},
@@ -565,26 +590,26 @@ RIVALIDADES: list[dict[str, Any]] = [
     },
     # Cross-condomínio (brigas que atravessam fronteiras)
     {
-        "apartamento_a_idx": 5,   # DJ Paredão (01 Norte — Barulho)
+        "apartamento_a_idx": 5,  # DJ Paredão (01 Norte — Barulho)
         "apartamento_b_idx": 18,  # Influencer do Condomínio (1301 A — Château)
         "motivo": "Disputa de quem faz mais barulho: som alto vs desafios de dança às 3h",
         "nivel": "intenso",
     },
     {
-        "apartamento_a_idx": 0,   # Dona Fofoqueira (101 A — Fofoca Feliz)
+        "apartamento_a_idx": 0,  # Dona Fofoqueira (101 A — Fofoca Feliz)
         "apartamento_b_idx": 22,  # Fiscal de Portaria (A1 — Quem Cala)
         "motivo": "Dona Fofoqueira descobriu que Fiscal de Portaria tem um caso e espalhou pelo condomínio inteiro",
         "nivel": "belico",
     },
     {
         "apartamento_a_idx": 20,  # Madame do Andar de Cima (1402 B — Château)
-        "apartamento_b_idx": 3,   # Tia do Andar de Cima (202 B — Fofoca Feliz)
+        "apartamento_b_idx": 3,  # Tia do Andar de Cima (202 B — Fofoca Feliz)
         "motivo": "Disputa pelo título não-oficial de 'Madame mais chique do condomínio'",
         "nivel": "leve",
     },
     {
-        "apartamento_a_idx": 1,   # Maria Barulho (102 A — Fofoca Feliz)
-        "apartamento_b_idx": 5,   # DJ Paredão (01 Norte — Barulho)
+        "apartamento_a_idx": 1,  # Maria Barulho (102 A — Fofoca Feliz)
+        "apartamento_b_idx": 5,  # DJ Paredão (01 Norte — Barulho)
         "motivo": "Qual dos dois faz mais barulho? Maria com o gato, DJ com a caixa de som. Vizinhaça já fez aposta.",
         "nivel": "moderado",
     },

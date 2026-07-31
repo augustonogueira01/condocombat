@@ -1,6 +1,7 @@
 """Integration tests for Morador REST endpoints."""
 
 from collections.abc import AsyncGenerator
+from datetime import UTC
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -50,7 +51,7 @@ def _make_morador(
     nome: str = "João Silva",
     cpf: str = "111.222.333-44",
 ) -> dict:
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     obj = MagicMock()
     obj.id = morador_id
@@ -60,8 +61,8 @@ def _make_morador(
     obj.telefone = "(11) 99999-0000"
     obj.tipo = "proprietario"
     obj.apartamento_id = 1
-    obj.created_at = datetime.now(timezone.utc)
-    obj.updated_at = datetime.now(timezone.utc)
+    obj.created_at = datetime.now(UTC)
+    obj.updated_at = datetime.now(UTC)
     return obj
 
 
@@ -69,7 +70,9 @@ def _make_morador(
 
 
 @pytest.mark.asyncio
-async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_retorna_lista(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     a, b = _make_morador(1, "João"), _make_morador(2, "Maria")
     mock_service.listar.return_value = [a, b]
 
@@ -83,7 +86,9 @@ async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: No
 
 
 @pytest.mark.asyncio
-async def test_listar_retorna_vazia(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_retorna_vazia(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.listar.return_value = []
 
     response = await client.get("/moradores/")
@@ -96,7 +101,9 @@ async def test_listar_retorna_vazia(client: httpx.AsyncClient, override_deps: No
 
 
 @pytest.mark.asyncio
-async def test_obter_retorna_morador(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_retorna_morador(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.buscar.return_value = _make_morador()
 
     response = await client.get("/moradores/1")
@@ -106,7 +113,9 @@ async def test_obter_retorna_morador(client: httpx.AsyncClient, override_deps: N
 
 
 @pytest.mark.asyncio
-async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.buscar.side_effect = MoradorNaoEncontrado("não encontrado")
 
     response = await client.get("/moradores/999")
@@ -119,7 +128,9 @@ async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, overri
 
 
 @pytest.mark.asyncio
-async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_retorna_201(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.return_value = _make_morador()
 
     response = await client.post(
@@ -137,14 +148,18 @@ async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None,
 
 
 @pytest.mark.asyncio
-async def test_criar_422_quando_dados_invalidos(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_422_quando_dados_invalidos(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.post("/moradores/", json={})
 
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_criar_409_quando_cpf_duplicado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_409_quando_cpf_duplicado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.side_effect = MoradorComCPFJaExiste("CPF já cadastrado")
 
     response = await client.post(
@@ -162,7 +177,9 @@ async def test_criar_409_quando_cpf_duplicado(client: httpx.AsyncClient, overrid
 
 
 @pytest.mark.asyncio
-async def test_criar_409_quando_email_duplicado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_409_quando_email_duplicado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.side_effect = MoradorComEmailJaExiste("Email já cadastrado")
 
     response = await client.post(
@@ -183,7 +200,9 @@ async def test_criar_409_quando_email_duplicado(client: httpx.AsyncClient, overr
 
 
 @pytest.mark.asyncio
-async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_retorna_200(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.return_value = _make_morador(nome="Nome Atualizado")
 
     response = await client.put("/moradores/1", json={"nome": "Nome Atualizado"})
@@ -193,7 +212,9 @@ async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: N
 
 
 @pytest.mark.asyncio
-async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.side_effect = MoradorNaoEncontrado("não encontrado")
 
     response = await client.put("/moradores/999", json={"nome": "Qualquer"})
@@ -202,8 +223,12 @@ async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, ov
 
 
 @pytest.mark.asyncio
-async def test_atualizar_409_quando_cpf_duplicado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
-    mock_service.atualizar.side_effect = MoradorComCPFJaExiste("CPF já pertence a outro morador")
+async def test_atualizar_409_quando_cpf_duplicado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
+    mock_service.atualizar.side_effect = MoradorComCPFJaExiste(
+        "CPF já pertence a outro morador"
+    )
 
     response = await client.put(
         "/moradores/1",
@@ -214,14 +239,18 @@ async def test_atualizar_409_quando_cpf_duplicado(client: httpx.AsyncClient, ove
 
 
 @pytest.mark.asyncio
-async def test_atualizar_422_quando_cpf_invalido(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_422_quando_cpf_invalido(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.put("/moradores/1", json={"cpf": "123"})
 
     assert response.status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_atualizar_400_quando_sem_campos(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_400_quando_sem_campos(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.put("/moradores/1", json={})
 
     assert response.status_code == 400
@@ -232,14 +261,18 @@ async def test_atualizar_400_quando_sem_campos(client: httpx.AsyncClient, overri
 
 
 @pytest.mark.asyncio
-async def test_remover_retorna_204(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_retorna_204(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.delete("/moradores/1")
 
     assert response.status_code == 204
 
 
 @pytest.mark.asyncio
-async def test_remover_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.remover.side_effect = MoradorNaoEncontrado("não encontrado")
 
     response = await client.delete("/moradores/999")

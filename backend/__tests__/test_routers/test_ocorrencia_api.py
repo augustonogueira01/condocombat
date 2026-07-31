@@ -1,7 +1,7 @@
 """Integration tests for Ocorrencia REST endpoints."""
 
 from collections.abc import AsyncGenerator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -54,8 +54,8 @@ def _make(**kw: dict) -> MagicMock:
         "gravidade": "media",
         "status": "aberta",
         "apartamento_id": 1,
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
+        "updated_at": datetime.now(UTC),
     }
     vals.update(kw)
     m = MagicMock(**vals)
@@ -66,7 +66,9 @@ def _make(**kw: dict) -> MagicMock:
 
 
 @pytest.mark.asyncio
-async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_retorna_lista(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     a, b = _make(id=1), _make(id=2, titulo="Outro")
     mock_service.listar.return_value = [a, b]
 
@@ -77,10 +79,14 @@ async def test_listar_retorna_lista(client: httpx.AsyncClient, override_deps: No
 
 
 @pytest.mark.asyncio
-async def test_listar_com_filtros(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_listar_com_filtros(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.listar.return_value = []
 
-    response = await client.get("/ocorrencias/?categoria=barulho&status=aberta&gravidade=media&apartamento_id=1")
+    response = await client.get(
+        "/ocorrencias/?categoria=barulho&status=aberta&gravidade=media&apartamento_id=1"
+    )
 
     assert response.status_code == 200
     assert response.json() == []
@@ -91,7 +97,9 @@ async def test_listar_com_filtros(client: httpx.AsyncClient, override_deps: None
 
 
 @pytest.mark.asyncio
-async def test_recentes_retorna_lista(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_recentes_retorna_lista(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.listar_recentes.return_value = [_make()]
 
     response = await client.get("/ocorrencias/recentes")
@@ -104,7 +112,9 @@ async def test_recentes_retorna_lista(client: httpx.AsyncClient, override_deps: 
 
 
 @pytest.mark.asyncio
-async def test_obter_retorna_ocorrencia(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_retorna_ocorrencia(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.buscar.return_value = _make()
 
     response = await client.get("/ocorrencias/1")
@@ -114,7 +124,9 @@ async def test_obter_retorna_ocorrencia(client: httpx.AsyncClient, override_deps
 
 
 @pytest.mark.asyncio
-async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_obter_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.buscar.side_effect = OcorrenciaNaoEncontrada("não encontrada")
 
     response = await client.get("/ocorrencias/999")
@@ -126,7 +138,9 @@ async def test_obter_404_quando_nao_encontrado(client: httpx.AsyncClient, overri
 
 
 @pytest.mark.asyncio
-async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_retorna_201(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.criar.return_value = _make()
 
     response = await client.post(
@@ -144,7 +158,9 @@ async def test_criar_retorna_201(client: httpx.AsyncClient, override_deps: None,
 
 
 @pytest.mark.asyncio
-async def test_criar_422_quando_dados_invalidos(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_criar_422_quando_dados_invalidos(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.post("/ocorrencias/", json={})
 
     assert response.status_code == 422
@@ -154,7 +170,9 @@ async def test_criar_422_quando_dados_invalidos(client: httpx.AsyncClient, overr
 
 
 @pytest.mark.asyncio
-async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_retorna_200(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.return_value = _make(titulo="Novo Título")
 
     response = await client.put("/ocorrencias/1", json={"titulo": "Novo Título"})
@@ -164,7 +182,9 @@ async def test_atualizar_retorna_200(client: httpx.AsyncClient, override_deps: N
 
 
 @pytest.mark.asyncio
-async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.side_effect = OcorrenciaNaoEncontrada("não encontrada")
 
     response = await client.put("/ocorrencias/999", json={"titulo": "X"})
@@ -173,7 +193,9 @@ async def test_atualizar_404_quando_nao_encontrado(client: httpx.AsyncClient, ov
 
 
 @pytest.mark.asyncio
-async def test_atualizar_409_transicao_invalida(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_409_transicao_invalida(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.atualizar.side_effect = TransicaoStatusInvalida("Transição inválida")
 
     response = await client.put("/ocorrencias/1", json={"status": "aberta"})
@@ -182,7 +204,9 @@ async def test_atualizar_409_transicao_invalida(client: httpx.AsyncClient, overr
 
 
 @pytest.mark.asyncio
-async def test_atualizar_400_sem_campos(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_atualizar_400_sem_campos(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.put("/ocorrencias/1", json={})
 
     assert response.status_code == 400
@@ -192,14 +216,18 @@ async def test_atualizar_400_sem_campos(client: httpx.AsyncClient, override_deps
 
 
 @pytest.mark.asyncio
-async def test_remover_retorna_204(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_retorna_204(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     response = await client.delete("/ocorrencias/1")
 
     assert response.status_code == 204
 
 
 @pytest.mark.asyncio
-async def test_remover_404_quando_nao_encontrado(client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock):
+async def test_remover_404_quando_nao_encontrado(
+    client: httpx.AsyncClient, override_deps: None, mock_service: MagicMock
+):
     mock_service.remover.side_effect = OcorrenciaNaoEncontrada("não encontrada")
 
     response = await client.delete("/ocorrencias/999")
